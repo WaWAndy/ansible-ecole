@@ -1,0 +1,14 @@
+- name: Desinstaller Apache2 des serveurs
+  hosts: serveurs_ubuntu
+  become: true
+  tasks:
+    - name: Supprimer Apache2
+      apt: 
+        name: apache2
+        state: absent
+        purge: yes # supprime aussi les fichiers de configuartion (mais pas le contenu de var/www/html !!!)
+
+#    - name: Verifier qu'apache2 est arrêté
+#      service:
+#        name: apache2
+#        state: stopped

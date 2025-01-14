@@ -1,0 +1,25 @@
+---
+- name: Installer Git sur les serveurs
+  hosts: serveurs_ubuntu
+  vars_files:
+    - ../vault.yml
+
+  become: true
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer Git
+      apt:
+        name: git
+        state: present
+
+    - name: Vérifier la version de Git
+      command: git --version
+      register: git_version
+
+    - name: Afficher la version de Git installée
+      debug:
+        msg: "La version de Git installée est : {{ git_version.stdout }}"
+

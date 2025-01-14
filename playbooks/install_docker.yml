@@ -1,0 +1,81 @@
+- name: Installer Docker et Docker Compose
+  hosts: serveurs_ubuntu
+  vars_files:
+    - ../vault.yml
+  become: true
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer les dépendances pour Docker
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Télécharger et ajouter la clé GPG officielle de Docker
+     #command: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /tmp/docker.gpg
+        mode: '0755'
+
+    - name: Ajouter la cle GPG officielle de Docker
+      command: gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg /tmp/docker.gpg
+
+    - name: Ajouter le dépôt Docker APT
+      copy:
+        content: |
+          deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu jammy stable
+        dest: /etc/apt/sources.list.d/docker.list
+
+
+    - name: Vérifier que la clé GPG est correctement ajoutée
+      stat:
+        path: /usr/share/keyrings/docker-archive-keyring.gpg
+      register: docker_gpg_key
+
+
+    - name: Mettre à jour le cache APT
+      apt:
+        update_cache: yes
+
+    - name: Installer Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    - name: Vérifier la version de Docker
+      command: docker --version
+      register: docker_version
+
+    - name: Afficher la version de Docker
+      debug:
+        msg: "La version installée de Docker est : {{ docker_version.stdout }}"
+
+    - name: Télécharger Docker Compose binaire
+      get_url:
+        url: https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Vérifier la version de Docker Compose
+      command: docker-compose --version
+      register: compose_version
+
+    - name: Afficher la version de Docker Compose
+      debug:
+        msg: "La version installée de Docker Compose est : {{ compose_version.stdout }}"
+
+    - name: Ensure uadmin is added to the Docker group
+      user:
+        name: uadmin
+        groups: docker
+        append: true

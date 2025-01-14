@@ -1,0 +1,21 @@
+---
+- name: Installation de Grafana sur le serveur1
+  hosts: serveur_grafana
+  vars_files:
+    - ../vault.yml
+
+  tasks:
+
+    - name: Cloner le repository Git
+      git:
+        repo: "https://github.com/nbittich/grafana-example.git"
+        dest: /home/uadmin/grafana
+      #when: inventory_hostname == "monserveur"
+
+    - name: Démarrer les conteneurs avec Docker Compose
+      shell: docker-compose up -d
+      become: true
+      args:
+        chdir: /home/uadmin/grafana
+      #when: inventory_hostname == "monserveur"
+

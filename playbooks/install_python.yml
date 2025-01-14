@@ -1,0 +1,23 @@
+- name: Installer Python sur les deux serveurs 
+  hosts: serveurs_ubuntu
+  vars_files:
+    - ../vault.yml
+
+  become: true
+  tasks:
+    - name: Mettre à jour la liste des paquets
+      apt:
+        update_cache: yes
+
+    - name: Installer Python3
+      apt: 
+        name: python3-pip
+        state: present
+
+    - name: Verifier la version de Python
+      command: python3 --version
+      register: python_version
+
+    - name: Afficher la version de Python
+      debug:
+        msg: "La version installé de python est {{ python_version.stdout}}"

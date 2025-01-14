@@ -1,0 +1,40 @@
+---
+- name: Install and configure UFW
+  #hosts: all
+  hosts: serveurs_ubuntu
+  vars_files:
+    - ../vault.yml
+
+  become: true
+  tasks:
+    - name: Install UFW
+      apt:
+        name: ufw
+        state: present
+        update_cache: yes
+
+    - name: Allow SSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Allow traffic on port 3000
+      ufw:
+        rule: allow
+        port: 3000
+        proto: tcp
+
+    - name: Deny all incoming traffic by default
+      ufw:
+        default: deny
+        direction: incoming
+
+    - name: Allow outgoing traffic by default
+      ufw:
+        default: allow
+        direction: outgoing
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+

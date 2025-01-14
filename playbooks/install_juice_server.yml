@@ -1,0 +1,21 @@
+---
+- name: Installation de juice_shop sur le serveur2
+  hosts: serveur_juice
+  vars_files:
+    - ../vault.yml
+
+  tasks:
+
+    - name: Cloner le repository Git
+      git:
+        repo: "https://github.com/nbittich/labo_pentest.git"
+        dest: /home/uadmin/juice_shop
+      #when: inventory_hostname == "monserveur"
+
+    - name: Démarrer les conteneurs avec Docker Compose
+      become: true
+      shell: docker-compose up -d
+      args:
+        chdir: /home/uadmin/juice_shop
+      #when: inventory_hostname == "monserveur"
+
